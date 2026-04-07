@@ -7,7 +7,7 @@ const affiliations = [
 
 export default function Affiliations() {
   return (
-    <section className="py-14 md:py-20 bg-white">
+    <section className="py-14 md:py-20 bg-white" aria-label="Affiliations and memberships">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* AAA Rating callout */}
         <ScrollReveal>
@@ -28,7 +28,7 @@ export default function Affiliations() {
             </div>
             <div className="flex-shrink-0 text-center">
               <div className="relative">
-                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gold-500 flex items-center justify-center animate-pulse-glow">
+                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gold-500 flex items-center justify-center animate-pulse-glow" aria-hidden="true">
                   <span className="text-display-xl text-gold-100 font-display font-black">AAA</span>
                 </div>
               </div>
@@ -43,12 +43,13 @@ export default function Affiliations() {
             Affiliations & Memberships
           </span>
         </div>
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden" role="list" aria-label="List of affiliations">
           <div className="flex animate-[slideMarquee_30s_linear_infinite] hover:[animation-play-state:paused]">
             {affiliations.map((name, i) => (
               <div
                 key={`${name}-${i}`}
                 className="mx-8 flex-shrink-0 opacity-50 hover:opacity-100 transition-all duration-300 flex items-center"
+                role="listitem"
               >
                 <div className="bg-ink-100 rounded-xl px-6 py-3 text-body-sm text-ink-600 font-medium whitespace-nowrap">
                   {name}

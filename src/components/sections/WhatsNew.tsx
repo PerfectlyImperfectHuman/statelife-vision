@@ -44,7 +44,7 @@ export default function WhatsNew() {
   const rest = articles.filter((a) => !a.is_featured);
 
   return (
-    <section className="py-14 md:py-24 bg-ink-50">
+    <section className="py-14 md:py-24 bg-ink-50" aria-label="Latest news">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="flex items-end justify-between mb-10">
@@ -56,8 +56,8 @@ export default function WhatsNew() {
                 What's New at State Life
               </h2>
             </div>
-            <Link to="/news" className="hidden sm:flex items-center gap-1 text-brand-500 text-body-sm font-semibold hover:gap-2 transition-all">
-              View All News <ChevronRight className="w-4 h-4" />
+            <Link to="/news" className="hidden sm:flex items-center gap-1 text-brand-500 text-body-sm font-semibold hover:gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 rounded-lg px-2 py-1">
+              View All News <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
         </ScrollReveal>
@@ -66,8 +66,8 @@ export default function WhatsNew() {
           {/* Featured */}
           {featured && (
             <ScrollReveal className="lg:row-span-2">
-              <Link to={`/news/${featured.id}`} className="block group h-full">
-                <div className="bg-ink-900 rounded-3xl overflow-hidden relative h-full min-h-[400px]">
+              <Link to={`/news/${featured.id}`} className="block group h-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 rounded-3xl">
+                <article className="bg-ink-900 rounded-3xl overflow-hidden relative h-full min-h-[400px]">
                   <img
                     src={featured.thumbnail_url}
                     alt={featured.title}
@@ -87,14 +87,14 @@ export default function WhatsNew() {
                     <p className="text-body-sm text-white/70 mt-2 line-clamp-2">{featured.excerpt}</p>
                     <div className="flex gap-4 mt-4">
                       <span className="flex items-center gap-1.5 text-white/50 text-body-xs">
-                        <Calendar className="w-3.5 h-3.5" />{formatDate(featured.published_at)}
+                        <Calendar className="w-3.5 h-3.5" aria-hidden="true" />{formatDate(featured.published_at)}
                       </span>
                       <span className="flex items-center gap-1.5 text-white/50 text-body-xs">
-                        <Clock className="w-3.5 h-3.5" />{featured.read_time_minutes} min read
+                        <Clock className="w-3.5 h-3.5" aria-hidden="true" />{featured.read_time_minutes} min read
                       </span>
                     </div>
                   </div>
-                </div>
+                </article>
               </Link>
             </ScrollReveal>
           )}
@@ -102,8 +102,8 @@ export default function WhatsNew() {
           {/* Smaller cards */}
           {rest.map((article, i) => (
             <ScrollReveal key={article.id} delay={i * 0.1}>
-              <Link to={`/news/${article.id}`} className="block group">
-                <div className="bg-white rounded-2xl overflow-hidden border border-ink-100 hover:shadow-card-hover transition-all duration-300 flex h-full">
+              <Link to={`/news/${article.id}`} className="block group focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 rounded-2xl">
+                <article className="bg-white rounded-2xl overflow-hidden border border-ink-100 hover:shadow-card-hover transition-all duration-300 flex h-full">
                   <div className="w-[120px] md:w-[160px] flex-shrink-0">
                     <img
                       src={article.thumbnail_url}
@@ -125,7 +125,7 @@ export default function WhatsNew() {
                       {formatDate(article.published_at)} • {article.read_time_minutes} min
                     </span>
                   </div>
-                </div>
+                </article>
               </Link>
             </ScrollReveal>
           ))}

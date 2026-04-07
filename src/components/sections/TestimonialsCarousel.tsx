@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { testimonials } from '@/lib/constants';
@@ -8,6 +8,8 @@ import AnimatedCounter from '@/components/shared/AnimatedCounter';
 export default function TestimonialsCarousel() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const announcementRef = useRef<HTMLDivElement>(null);
 
   // On lg+ we show 2 cards, so total pages = ceil(length/2)
   const totalPages = Math.ceil(testimonials.length / 2);
@@ -18,11 +20,34 @@ export default function TestimonialsCarousel() {
 
   const prev = () => setCurrent((c) => (c - 1 + totalPages) % totalPages);
 
+  const goToSlide = (index: number) => {
+    setCurrent(index);
+    if (announcementRef.current) {
+      announcementRef.current.textContent = `Testimonial ${index + 1} of ${totalPages}`;
+    }
+  };
+
   useEffect(() => {
     if (paused) return;
     const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
   }, [paused, next]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!carouselRef.current?.contains(document.activeElement)) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        next();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [next, prev]);
 
   // Get visible testimonials
   const getVisible = () => {
@@ -91,10 +116,21 @@ export default function TestimonialsCarousel() {
 
           {/* Right carousel */}
           <div
+            ref={carouselRef}
             className="lg:col-span-3 relative"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
+            role="region"
+            aria-label="Testimonials carousel"
+            aria-roledescription="carousel"
           >
+            <div
+              ref={announcementRef}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            />
             <AnimatePresence mode="wait">
               <motion.div
                 key={current}
@@ -103,6 +139,9 @@ export default function TestimonialsCarousel() {
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.4 }}
                 className="flex gap-6"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${current + 1} of ${totalPages}`}
               >
                 {/* Mobile: 1 card, Desktop: 2 cards */}
                 <div className="w-full lg:hidden">
@@ -119,30 +158,61 @@ export default function TestimonialsCarousel() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={prev}
-                  className="w-10 h-10 rounded-full bg-white border border-ink-200 flex items-center justify-center text-ink-500 hover:text-brand-500 hover:border-brand-300 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowLeft') {
+                      e.preventDefault();
+                      prev();
+                    } else if (e.key === 'ArrowRight') {
+                      e.preventDefault();
+                      next();
+                    }
+                  }}
+                  className="w-10 h-10 rounded-full bg-white border border-ink-200 flex items-center justify-center text-ink-500 hover:text-brand-500 hover:border-brand-300 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                   aria-label="Previous testimonial"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-5 h-5" aria-hidden="true" />
                 </button>
                 <button
                   onClick={next}
-                  className="w-10 h-10 rounded-full bg-white border border-ink-200 flex items-center justify-center text-ink-500 hover:text-brand-500 hover:border-brand-300 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowLeft') {
+                      e.preventDefault();
+                      prev();
+                    } else if (e.key === 'ArrowRight') {
+                      e.preventDefault();
+                      next();
+                    }
+                  }}
+                  className="w-10 h-10 rounded-full bg-white border border-ink-200 flex items-center justify-center text-ink-500 hover:text-brand-500 hover:border-brand-300 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                   aria-label="Next testimonial"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
 
               {/* Dot indicators */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" role="tablist" aria-label="Carousel navigation">
                 {Array.from({ length: totalPages }).map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setCurrent(i)}
-                    className={`rounded-full transition-all duration-300 h-2 ${
-                      i === current ? 'w-6 bg-brand-500' : 'w-2 bg-ink-200'
+                    onClick={() => goToSlide(i)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowLeft' && i > 0) {
+                        e.preventDefault();
+                        goToSlide(i - 1);
+                      } else if (e.key === 'ArrowRight' && i < totalPages - 1) {
+                        e.preventDefault();
+                        goToSlide(i + 1);
+                      }
+                    }}
+                    role="tab"
+                    aria-selected={i === current}
+                    aria-controls={`testimonial-slide-${i}`}
+                    tabIndex={i === current ? 0 : -1}
+                    className={`rounded-full transition-all duration-300 h-2 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+                      i === current ? 'w-6 bg-brand-500' : 'w-2 bg-ink-200 hover:bg-ink-300'
                     }`}
-                    aria-label={`Go to slide ${i + 1}`}
+                    aria-label={`Go to testimonial ${i + 1}`}
                   />
                 ))}
               </div>

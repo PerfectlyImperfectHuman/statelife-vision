@@ -52,12 +52,13 @@ export default function FinancialReports() {
         </ScrollReveal>
 
         {/* Year tabs */}
-        <div className="flex gap-2 justify-center mt-8">
+        <div className="flex gap-2 justify-center mt-8" role="group" aria-label="Filter reports by year">
           {years.map((year) => (
             <button
               key={year}
               onClick={() => setActiveYear(year)}
-              className={`rounded-lg px-5 py-2 text-body-sm font-medium transition-all ${
+              aria-pressed={activeYear === year}
+              className={`rounded-lg px-5 py-2 text-body-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
                 activeYear === year
                   ? 'bg-brand-500 text-white shadow-md'
                   : 'text-ink-500 hover:text-brand-500 hover:bg-brand-50'
@@ -85,8 +86,12 @@ export default function FinancialReports() {
                     <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" />{report.page_count} pages</span>
                     <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(report.published_date)}</span>
                   </div>
-                  <button className="mt-4 w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-2.5 text-body-sm font-semibold flex items-center justify-center gap-2 transition-colors">
-                    <DownloadCloud className="w-4 h-4" />
+                  <button 
+                    onClick={() => {/* Download functionality */}}
+                    className="mt-4 w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-2.5 text-body-sm font-semibold flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                    aria-label={`Download ${report.title}`}
+                  >
+                    <DownloadCloud className="w-4 h-4" aria-hidden="true" />
                     Download
                   </button>
                 </div>

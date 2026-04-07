@@ -10,7 +10,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1 pt-[calc(2.25rem+56px)] md:pt-[calc(2.25rem+72px)]">
+      <main id="main-content" className="flex-1 pt-[calc(2.25rem+56px)] md:pt-[calc(2.25rem+72px)]" role="main" tabIndex={-1}>
         {children}
       </main>
       <Footer />

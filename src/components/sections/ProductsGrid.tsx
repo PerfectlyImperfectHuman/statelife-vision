@@ -51,12 +51,13 @@ export default function ProductsGrid() {
         </ScrollReveal>
 
         {/* Filter pills */}
-        <div className="flex flex-wrap gap-2 justify-center mt-8">
+        <div className="flex flex-wrap gap-2 justify-center mt-8" role="group" aria-label="Product category filters">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`relative rounded-full px-5 py-2 text-body-sm font-medium transition-all duration-200 ${
+              aria-pressed={activeCategory === cat}
+              className={`relative rounded-full px-5 py-2 text-body-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
                 activeCategory === cat
                   ? 'bg-brand-500 text-white shadow-md'
                   : 'bg-white border border-ink-200 text-ink-600 hover:border-brand-300'

@@ -23,6 +23,9 @@ const App = () => (
       <BrowserRouter>
         <FloatingElements />
         <Suspense fallback={<PageSkeleton />}>
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-brand-500 focus:text-white focus:px-6 focus:py-3 focus:rounded-lg focus:font-semibold focus:shadow-lg">
+            Skip to main content
+          </a>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/state-health" element={<StateHealth />} />

@@ -117,15 +117,16 @@ export default function Footer() {
                 <Phone className="w-4 h-4" />
                 0800-700-900
               </a>
-              <div className="flex items-center gap-2 mt-5">
+              <div className="flex items-center gap-2 mt-5" role="list" aria-label="Social media links">
                 {socialIcons.map(({ icon: Icon, href }, i) => (
                   <a
                     key={i}
                     href={href}
-                    className="w-9 h-9 rounded-lg bg-brand-800 hover:bg-brand-600 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200"
-                    aria-label={`Social media link ${i + 1}`}
+                    role="listitem"
+                    aria-label={`Visit our social media page ${i + 1}`}
+                    className="w-9 h-9 rounded-lg bg-brand-800 hover:bg-brand-600 flex items-center justify-center text-white/70 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-950"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4" aria-hidden="true" />
                   </a>
                 ))}
               </div>
@@ -137,12 +138,12 @@ export default function Footer() {
                 <h4 className="text-body-xs text-ink-400 uppercase tracking-widest font-semibold pb-4 border-b border-brand-800 mb-4">
                   {group.heading}
                 </h4>
-                <nav className="space-y-0.5">
+                <nav className="space-y-0.5" aria-label={group.heading}>
                   {group.links.map((link) => (
                     <Link
                       key={link.label}
                       to={link.href}
-                      className="block text-body-sm text-ink-500 hover:text-white transition-colors py-1.5"
+                      className="block text-body-sm text-ink-500 hover:text-white transition-colors py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-brand-950 rounded"
                     >
                       {link.label}
                     </Link>

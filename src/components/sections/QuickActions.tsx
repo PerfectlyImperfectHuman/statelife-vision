@@ -17,9 +17,9 @@ const colorMap: Record<string, { bg: string; text: string; hoverBg: string; hove
 
 export default function QuickActions() {
   return (
-    <section className="bg-white border-b border-ink-100 py-6 shadow-card">
+    <section className="bg-white border-b border-ink-100 py-6 shadow-card" aria-label="Quick actions">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1" role="list">
           {actions.map(({ icon: Icon, label, sublabel, href, color }) => {
             const c = colorMap[color];
             const Component = href.startsWith('tel:') || href.startsWith('#') ? 'a' : Link;
@@ -28,9 +28,11 @@ export default function QuickActions() {
               <Component
                 key={label}
                 {...(props as any)}
-                className={`flex items-center gap-4 min-w-[200px] snap-start bg-ink-50 ${c.hoverBg} border border-ink-100 ${c.hoverBorder} rounded-2xl px-5 py-4 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover flex-shrink-0`}
+                role="listitem"
+                aria-label={`${label}: ${sublabel}`}
+                className={`flex items-center gap-4 min-w-[200px] snap-start bg-ink-50 ${c.hoverBg} border border-ink-100 ${c.hoverBorder} rounded-2xl px-5 py-4 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2`}
               >
-                <div className={`w-10 h-10 rounded-xl ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0`}>
+                <div className={`w-10 h-10 rounded-xl ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0`} aria-hidden="true">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>

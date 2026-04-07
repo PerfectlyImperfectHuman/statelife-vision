@@ -9,15 +9,16 @@ const stats = [
 
 export default function StatsBar() {
   return (
-    <section className="bg-brand-500">
+    <section className="bg-brand-500" aria-label="Company statistics">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" role="list">
           {stats.map((stat, i) => (
             <div
               key={stat.label}
               className={`text-center py-2 ${
                 i < stats.length - 1 ? 'lg:border-r lg:border-white/20' : ''
               }`}
+              role="listitem"
             >
               <div className="text-display-md text-white font-display">
                 <AnimatedCounter end={stat.value} suffix={stat.suffix} />
