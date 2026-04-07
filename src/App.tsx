@@ -13,6 +13,8 @@ const Products = React.lazy(() => import('./pages/Products'));
 const Policyholder = React.lazy(() => import('./pages/Policyholder'));
 const Contact = React.lazy(() => import('./pages/Contact'));
 const About = React.lazy(() => import('./pages/About'));
+const Downloads = React.lazy(() => import('./pages/Downloads'));
+const PayPremium = React.lazy(() => import('./pages/PayPremium'));
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/policyholder" element={<Policyholder />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/downloads" element={<Downloads />} />
+            <Route path="/pay" element={<PayPremium />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
