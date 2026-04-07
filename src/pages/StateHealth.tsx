@@ -1,4 +1,4 @@
-import { CheckCircle, Phone, Smartphone } from 'lucide-react';
+import { CheckCircle, Phone, Smartphone, Heart, Shield, Users } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
@@ -13,12 +13,12 @@ const plans = [
 ];
 
 const programs = [
-  { name: "Prime Minister's National Health Programme", short: 'PM NHP', color: 'bg-accent-600' },
-  { name: "Chief Minister's Transparent Programme", short: 'CM TP', color: 'bg-red-800' },
-  { name: "CM Childless Health Surgery Programme", short: 'CM CHSP', color: 'bg-brand-600' },
-  { name: 'Chief Minister Dialysis Programme', short: 'CM Dialysis', color: 'bg-purple-800' },
-  { name: 'Aman Card Plus AJK', short: 'Aman Card', color: 'bg-accent-500' },
-  { name: 'Balochistan Health Card Programme', short: 'BHC', color: 'bg-amber-800' },
+  { name: "Prime Minister's National Health Programme", short: 'PM NHP', color: 'bg-accent-600', description: 'Providing free inpatient treatment to low-income families across all provinces through a network of accredited hospitals.' },
+  { name: "Chief Minister's Transparent Programme", short: 'CM TP', color: 'bg-red-800', description: 'Transparent, digitally-verified health coverage ensuring eligible citizens receive timely medical treatment.' },
+  { name: "CM Childless Health Surgery Programme", short: 'CM CHSP', color: 'bg-brand-600', description: 'Specialized surgical coverage for couples facing childlessness, funded by the provincial government.' },
+  { name: 'Chief Minister Dialysis Programme', short: 'CM Dialysis', color: 'bg-purple-800', description: 'Free dialysis treatment for kidney patients registered under the provincial social health initiative.' },
+  { name: 'Aman Card Plus AJK', short: 'Aman Card', color: 'bg-accent-500', description: 'Health insurance coverage for residents of Azad Jammu & Kashmir under the Aman Card social protection scheme.' },
+  { name: 'Balochistan Health Card Programme', short: 'BHC', color: 'bg-amber-800', description: 'Comprehensive health protection for Balochistan residents covering inpatient treatment at panel hospitals.' },
 ];
 
 const steps = [
@@ -40,35 +40,49 @@ const colorMap: Record<string, { border: string; bg: string; text: string }> = {
   gold: { border: 'border-t-gold-500', bg: 'bg-gold-100', text: 'text-gold-500' },
 };
 
+const heroStats = [
+  { value: 180, suffix: 'M+', label: 'Pakistanis Served', Icon: Users },
+  { value: 31, suffix: 'M+', label: 'Visitors Annually', Icon: Heart },
+  { value: 15, suffix: 'M+', label: 'Current Admissions', Icon: Shield },
+];
+
 export default function StateHealth() {
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="py-14 md:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* HERO */}
+      <section className="relative min-h-[70vh] overflow-hidden bg-gradient-to-br from-[#002616] via-[#014d28] to-[#002616]">
+        <img
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1400&q=80"
+          alt="Medical professionals in a hospital"
+          className="absolute inset-0 w-full h-full object-cover opacity-20"
+          loading="eager"
+          width={1400}
+          height={900}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 flex items-center min-h-[70vh]">
+          <div className="grid lg:grid-cols-2 gap-12 items-center w-full py-14 md:py-24">
             <ScrollReveal>
-              <span className="inline-block bg-accent-100 text-accent-600 rounded-full px-4 py-1.5 text-body-xs uppercase tracking-widest font-semibold">
-                State Health
+              <span className="inline-block bg-accent-500/20 text-accent-300 border border-accent-500/30 rounded-full px-4 py-2 text-body-xs font-semibold uppercase tracking-widest">
+                State Health Insurance
               </span>
-              <h1 className="text-display-xl text-ink-900 font-display mt-4">
+              <h1 className="text-display-xl text-white font-display mt-4">
                 Comprehensive Health Coverage for Every Pakistani
               </h1>
-              <p className="text-body-lg text-ink-500 max-w-xl mt-4">
-                From individual health plans to government social health insurance programmes, State Life provides cashless treatment through 30,000+ panel hospitals nationwide.
+              <p className="text-body-lg text-white/70 mt-4 max-w-lg">
+                From individual plans to government social health programs — State Life protects 180 million Pakistanis with cashless treatment at 30,000+ panel hospitals nationwide.
               </p>
               <div className="flex flex-wrap gap-3 mt-6">
-                {['Cashless Treatment', '30,000+ Panel Hospitals', '24/7 Helpline'].map((pill) => (
-                  <span key={pill} className="bg-accent-100 text-accent-600 rounded-full px-4 py-2 text-body-sm font-medium">
+                {['✓ Cashless Treatment', '✓ 30,000+ Panel Hospitals', '✓ 24/7 Helpline'].map((pill) => (
+                  <span key={pill} className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full px-4 py-2 text-body-sm">
                     {pill}
                   </span>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-3 mt-8">
+              <div className="flex flex-wrap gap-4 mt-8">
                 <a href="#plans" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-full px-8 py-4 text-body-sm transition-colors">
                   Get Sehat Card
                 </a>
-                <a href="tel:080009009" className="inline-flex items-center gap-2 border-2 border-accent-500 text-accent-600 rounded-full px-8 py-4 text-body-sm font-semibold hover:bg-accent-100 transition-colors">
+                <a href="tel:080009009" className="inline-flex items-center gap-2 border-2 border-white/40 text-white rounded-full px-8 py-4 text-body-sm font-semibold hover:bg-white/10 transition-colors">
                   Call 0800-09009
                 </a>
               </div>
@@ -76,16 +90,17 @@ export default function StateHealth() {
 
             <ScrollReveal delay={0.2}>
               <div className="space-y-4">
-                {[
-                  { value: 180, suffix: 'M+', label: 'Beneficiaries Covered' },
-                  { value: 31, suffix: 'M+', label: 'Sehat Cards Issued' },
-                  { value: 15, suffix: 'M+', label: 'Hospital Treatments' },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white rounded-2xl p-6 border border-ink-100 shadow-card">
-                    <div className="text-display-lg text-accent-600 font-display">
-                      <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                {heroStats.map((stat) => (
+                  <div key={stat.label} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-accent-500/20 flex items-center justify-center flex-shrink-0">
+                      <stat.Icon className="w-5 h-5 text-accent-300" />
                     </div>
-                    <div className="text-body-sm text-ink-500">{stat.label}</div>
+                    <div>
+                      <div className="text-display-md text-white font-display font-bold">
+                        <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                      </div>
+                      <div className="text-body-sm text-white/60">{stat.label}</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -148,7 +163,7 @@ export default function StateHealth() {
                     </div>
                     <h3 className="font-display font-semibold text-body-lg text-ink-900 mt-4">{prog.name}</h3>
                     <p className="text-body-sm text-ink-500 mt-2 px-2">
-                      Government-backed health coverage providing cashless treatment to eligible citizens.
+                      {prog.description}
                     </p>
                   </div>
                 </div>
@@ -164,9 +179,7 @@ export default function StateHealth() {
           <ScrollReveal>
             <h2 className="text-display-xl text-white font-display text-center">How Sehat Card Works</h2>
           </ScrollReveal>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 relative">
-            {/* Connecting line (desktop) */}
             <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-ink-700/50" />
             {steps.map((step, i) => (
               <ScrollReveal key={step.num} delay={i * 0.1}>
@@ -188,19 +201,10 @@ export default function StateHealth() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <ScrollReveal>
-              <h2 className="text-display-xl text-white font-display">
-                State Life Health Plus App
-              </h2>
-              <p className="text-body-lg text-white/70 mt-4">
-                Manage your health coverage, find hospitals, and track claims — all from your phone.
-              </p>
+              <h2 className="text-display-xl text-white font-display">State Life Health Plus App</h2>
+              <p className="text-body-lg text-white/70 mt-4">Manage your health coverage, find hospitals, and track claims — all from your phone.</p>
               <div className="space-y-4 mt-8">
-                {[
-                  'Find nearest panel hospital instantly',
-                  'View and download Sehat Card',
-                  'Track claim status in real-time',
-                  '24/7 customer support via chat',
-                ].map((feat) => (
+                {['Find nearest panel hospital instantly', 'View and download Sehat Card', 'Track claim status in real-time', '24/7 customer support via chat'].map((feat) => (
                   <div key={feat} className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-accent-300 flex-shrink-0" />
                     <span className="text-white/80 text-body-md">{feat}</span>
@@ -208,7 +212,6 @@ export default function StateHealth() {
                 ))}
               </div>
             </ScrollReveal>
-
             <ScrollReveal delay={0.2}>
               <div className="flex justify-center">
                 <div className="relative animate-float">
@@ -231,7 +234,6 @@ export default function StateHealth() {
           <ScrollReveal>
             <h2 className="text-display-xl text-ink-900 font-display text-center">Get Support</h2>
           </ScrollReveal>
-
           <div className="grid sm:grid-cols-3 gap-6 mt-10">
             {support.map((item, i) => (
               <ScrollReveal key={item.region} delay={i * 0.1}>
