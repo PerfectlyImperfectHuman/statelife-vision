@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CreditCard, FileSearch, UserSearch, MapPin, Phone, CheckCircle, Loader2 } from 'lucide-react';
+import { CreditCard, FileSearch, UserSearch, MapPin, Phone, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
 import ScrollReveal from '@/components/shared/ScrollReveal';
+import SEOHead from '@/components/shared/SEOHead';
+import { supabase } from '@/lib/supabase';
 
-// ---- PAY PREMIUM ----
 const step1Schema = z.object({
   policyNumber: z.string().regex(/^[A-Z]{2}-\d{6,8}$/, 'Format: SL-XXXXXXX'),
   cnic: z.string().regex(/^\d{5}-\d{7}-\d{1}$/, 'Format: 35201-1234567-1'),
 });
-
 type Step1Data = z.infer<typeof step1Schema>;
 
 function PayPremiumSection() {
@@ -19,30 +19,44 @@ function PayPremiumSection() {
   const [policyData, setPolicyData] = useState<Step1Data | null>(null);
   const [installment, setInstallment] = useState<'quarterly' | 'half' | 'annual'>('quarterly');
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { register, handleSubmit, formState: { errors } } = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
   });
 
-  const amounts = { quarterly: '12,500', half: '24,000', annual: '45,000' };
+  const amountsNum = { quarterly: 12500, half: 24000, annual: 45000 };
+  const amountsStr = { quarterly: '12,500', half: '24,000', annual: '45,000' };
 
   const onStep1 = (data: Step1Data) => {
-    setLoading(true);
+    setStatus('loading');
     setTimeout(() => {
       setPolicyData(data);
       setStep(2);
-      setLoading(false);
+      setStatus('idle');
     }, 1500);
   };
 
-  const onStep3Pay = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setDone(true);
-      setLoading(false);
-    }, 1500);
+  const onStep3Pay = async () => {
+    setStatus('loading');
+    try {
+      if (supabase) {
+        const { error } = await supabase.from('premium_payments').insert([{
+          policy_number: policyData?.policyNumber || '',
+          amount: amountsNum[installment],
+          installment_type: installment,
+          method: paymentMethod || '',
+          status: 'initiated',
+          created_at: new Date().toISOString(),
+        }]);
+        if (error) throw error;
+      }
+      setStatus('success');
+    } catch (err: unknown) {
+      setStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Payment initiation failed.');
+    }
   };
 
   const dots = (
@@ -53,12 +67,24 @@ function PayPremiumSection() {
     </div>
   );
 
-  if (done) {
+  if (status === 'success') {
     return (
       <div className="bg-white rounded-3xl border-2 border-brand-100 shadow-modal p-8 text-center">
         <CheckCircle className="w-16 h-16 text-accent-500 mx-auto" />
         <h3 className="text-display-md font-display text-ink-900 mt-4">Payment Initiated!</h3>
         <p className="text-body-md text-ink-500 mt-2">Redirecting to payment gateway...</p>
+        <button onClick={() => { setStatus('idle'); setStep(1); setPolicyData(null); }} className="mt-6 text-brand-500 text-body-sm font-semibold hover:text-brand-600 transition-colors">Submit another request →</button>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="bg-white rounded-3xl border-2 border-brand-100 shadow-modal p-8 text-center">
+        <AlertCircle className="w-16 h-16 text-error mx-auto" />
+        <h3 className="text-display-md font-display text-ink-900 mt-4">Submission Failed</h3>
+        <p className="text-body-md text-ink-500 mt-2">{errorMessage}</p>
+        <button onClick={() => setStatus('idle')} className="mt-6 text-brand-500 text-body-sm font-semibold hover:text-brand-600 transition-colors">Try again →</button>
       </div>
     );
   }
@@ -80,8 +106,8 @@ function PayPremiumSection() {
             <input {...register('cnic')} placeholder="35201-1234567-1" className={`w-full border ${errors.cnic ? 'border-error' : 'border-ink-200'} rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition`} />
             {errors.cnic && <p className="text-error text-body-xs mt-1">{errors.cnic.message}</p>}
           </div>
-          <button type="submit" disabled={loading} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors flex items-center justify-center gap-2">
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching...</> : 'Look Up Policy'}
+          <button type="submit" disabled={status === 'loading'} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-70">
+            {status === 'loading' ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching...</> : 'Look Up Policy'}
           </button>
         </form>
       )}
@@ -95,7 +121,6 @@ function PayPremiumSection() {
             <div className="flex justify-between text-body-sm"><span className="text-ink-500">Policy #</span><span className="font-semibold text-ink-900">{policyData.policyNumber}</span></div>
             <div className="flex justify-between text-body-sm"><span className="text-ink-500">Due Date</span><span className="inline-block bg-warning/10 text-warning rounded-full px-3 py-0.5 text-body-xs font-semibold">Due: April 30, 2026</span></div>
           </div>
-
           <div className="space-y-3">
             {([['quarterly', 'Quarterly', 'PKR 12,500', ''], ['half', 'Half-Yearly', 'PKR 24,000', 'Save PKR 1,000'], ['annual', 'Annual', 'PKR 45,000', 'Save PKR 5,000']] as const).map(([key, label, amount, save]) => (
               <button key={key} onClick={() => setInstallment(key)} className={`w-full flex items-center justify-between border-2 ${installment === key ? 'border-brand-500 bg-brand-50' : 'border-ink-100'} rounded-xl p-4 transition-colors text-left`}>
@@ -112,9 +137,7 @@ function PayPremiumSection() {
               </button>
             ))}
           </div>
-          <button onClick={() => setStep(3)} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors">
-            Proceed to Payment
-          </button>
+          <button onClick={() => setStep(3)} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors">Proceed to Payment</button>
         </div>
       )}
 
@@ -133,8 +156,8 @@ function PayPremiumSection() {
               </button>
             ))}
           </div>
-          <button onClick={onStep3Pay} disabled={!paymentMethod || loading} className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors flex items-center justify-center gap-2">
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : `Pay PKR ${amounts[installment]}`}
+          <button onClick={onStep3Pay} disabled={!paymentMethod || status === 'loading'} className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors flex items-center justify-center gap-2">
+            {status === 'loading' ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : `Pay PKR ${amountsStr[installment]}`}
           </button>
         </div>
       )}
@@ -142,10 +165,26 @@ function PayPremiumSection() {
   );
 }
 
-// ---- TRACK CLAIM ----
 function TrackClaimSection() {
   const [tab, setTab] = useState<'individual' | 'group'>('individual');
   const [showResult, setShowResult] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading'>('idle');
+  const [policyNum, setPolicyNum] = useState('');
+  const [cnicVal, setCnicVal] = useState('');
+  const [claimType, setClaimType] = useState('Death Claim');
+
+  const onTrack = async () => {
+    setStatus('loading');
+    try {
+      if (supabase) {
+        await supabase.from('claim_searches').insert([{
+          policy_number: policyNum, cnic: cnicVal, claim_type: claimType,
+          created_at: new Date().toISOString(),
+        }]);
+      }
+    } catch { /* silent */ }
+    setTimeout(() => { setShowResult(true); setStatus('idle'); }, 1500);
+  };
 
   return (
     <div>
@@ -156,21 +195,20 @@ function TrackClaimSection() {
           </button>
         ))}
       </div>
-
       <div className="bg-white rounded-3xl p-8 border border-ink-100 shadow-card">
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-body-sm font-medium text-ink-700 mb-1">{tab === 'group' ? 'Company NTN' : 'Policy Number'}</label>
-            <input placeholder={tab === 'group' ? 'Company NTN' : 'SL-XXXXXXX'} className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <input value={policyNum} onChange={e => setPolicyNum(e.target.value)} placeholder={tab === 'group' ? 'Company NTN' : 'SL-XXXXXXX'} className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
           </div>
           <div>
             <label className="block text-body-sm font-medium text-ink-700 mb-1">{tab === 'group' ? 'Group Policy Number' : 'CNIC Number'}</label>
-            <input placeholder={tab === 'group' ? 'GP-XXXXXXX' : '35201-1234567-1'} className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <input value={cnicVal} onChange={e => setCnicVal(e.target.value)} placeholder={tab === 'group' ? 'GP-XXXXXXX' : '35201-1234567-1'} className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
           </div>
           {tab === 'individual' && (
             <div className="sm:col-span-2">
               <label className="block text-body-sm font-medium text-ink-700 mb-1">Claim Type</label>
-              <select className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+              <select value={claimType} onChange={e => setClaimType(e.target.value)} className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
                 <option>Death Claim</option><option>Maturity Claim</option><option>Surrender</option><option>Loan</option><option>Premium Waiver</option>
               </select>
             </div>
@@ -186,10 +224,9 @@ function TrackClaimSection() {
             </>
           )}
         </div>
-        <button onClick={() => setShowResult(true)} className="mt-6 bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-8 py-3 text-body-sm font-semibold transition-colors">
-          Track Claim
+        <button onClick={onTrack} disabled={status === 'loading'} className="mt-6 bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-8 py-3 text-body-sm font-semibold transition-colors flex items-center gap-2 disabled:opacity-70">
+          {status === 'loading' ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching...</> : 'Track Claim'}
         </button>
-
         {showResult && (
           <div className="mt-8 bg-ink-50 rounded-2xl p-6 border border-ink-100">
             <div className="flex items-center justify-between mb-4">
@@ -205,9 +242,7 @@ function TrackClaimSection() {
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-body-xs text-ink-500 mt-1">
-              <span>Received</span><span>Under Review</span><span>Approved</span>
-            </div>
+            <div className="flex justify-between text-body-xs text-ink-500 mt-1"><span>Received</span><span>Under Review</span><span>Approved</span></div>
           </div>
         )}
       </div>
@@ -215,7 +250,6 @@ function TrackClaimSection() {
   );
 }
 
-// ---- FIND AGENT ----
 const agents = [
   { name: 'Khalid Mehmood', city: 'Lahore', area: 'Gulberg III', phone: '0300-1234567', spec: 'Life Insurance', license: 'SL-00234' },
   { name: 'Fatima Zahra', city: 'Karachi', area: 'DHA Phase 5', phone: '0321-7654321', spec: 'Health Insurance', license: 'SL-00891' },
@@ -229,28 +263,38 @@ const specColors: Record<string, string> = {
 };
 
 function FindAgentSection() {
+  const [city, setCity] = useState('Lahore');
+  const [area, setArea] = useState('');
+  const [searched, setSearched] = useState(false);
+
+  const onSearch = async () => {
+    try {
+      if (supabase) {
+        await supabase.from('agent_searches').insert([{ city, area, created_at: new Date().toISOString() }]);
+      }
+    } catch { /* silent */ }
+    setSearched(true);
+  };
+
   return (
     <div>
       <div className="bg-white rounded-3xl p-8 border border-ink-100 shadow-card mb-8">
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-body-sm font-medium text-ink-700 mb-1">City</label>
-            <select className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+            <select value={city} onChange={e => setCity(e.target.value)} className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
               <option>Lahore</option><option>Karachi</option><option>Islamabad</option><option>Faisalabad</option><option>Rawalpindi</option><option>Peshawar</option><option>Multan</option><option>Quetta</option>
             </select>
           </div>
           <div>
             <label className="block text-body-sm font-medium text-ink-700 mb-1">Area / District</label>
-            <input placeholder="e.g. Gulberg" className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <input value={area} onChange={e => setArea(e.target.value)} placeholder="e.g. Gulberg" className="w-full border border-ink-200 rounded-xl px-4 py-3 text-body-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
           </div>
           <div className="flex items-end">
-            <button className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors">
-              Search
-            </button>
+            <button onClick={onSearch} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors">Search</button>
           </div>
         </div>
       </div>
-
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {agents.map((a) => (
           <ScrollReveal key={a.license}>
@@ -265,13 +309,9 @@ function FindAgentSection() {
                 </div>
               </div>
               <span className={`inline-block ${specColors[a.spec] || ''} rounded-full px-3 py-1 text-body-xs font-semibold mt-3`}>{a.spec}</span>
-              <div className="flex items-center gap-2 text-body-sm text-ink-500 mt-3">
-                <MapPin className="w-4 h-4" /> {a.city}, {a.area}
-              </div>
+              <div className="flex items-center gap-2 text-body-sm text-ink-500 mt-3"><MapPin className="w-4 h-4" /> {a.city}, {a.area}</div>
               <div className="text-body-md text-brand-500 font-semibold mt-2">{a.phone}</div>
-              <a href={`tel:${a.phone.replace(/-/g, '')}`} className="block mt-4 text-center border-2 border-brand-500 text-brand-600 rounded-xl py-2.5 text-body-sm font-semibold hover:bg-brand-50 transition-colors">
-                Contact Agent
-              </a>
+              <a href={`tel:${a.phone.replace(/-/g, '')}`} className="block mt-4 text-center border-2 border-brand-500 text-brand-600 rounded-xl py-2.5 text-body-sm font-semibold hover:bg-brand-50 transition-colors">Contact Agent</a>
             </div>
           </ScrollReveal>
         ))}
@@ -280,11 +320,14 @@ function FindAgentSection() {
   );
 }
 
-// ---- MAIN PAGE ----
 export default function Policyholder() {
   return (
     <PageLayout>
-      {/* Hero */}
+      <SEOHead
+        title="Policyholder Services — Pay Premium, Claims & Agent Finder"
+        description="Manage your State Life policy online. Pay premiums instantly, track claim status, find a local agent, and access all policyholder services in one place."
+        canonical="/policyholder"
+      />
       <section className="py-14 md:py-16 bg-gradient-to-br from-brand-800 to-brand-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
@@ -307,39 +350,30 @@ export default function Policyholder() {
         </div>
       </section>
 
-      {/* Pay Premium */}
       <section id="pay" className="py-14 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <ScrollReveal>
               <h2 className="text-display-md font-display text-ink-900">Pay Your Premium Online</h2>
               <div className="space-y-5 mt-8">
-                {[
-                  'Enter your policy number',
-                  'Verify your CNIC',
-                  'Choose amount & installment',
-                  'Pay via JazzCash, EasyPaisa, or card',
-                ].map((s, i) => (
+                {['Enter your policy number', 'Verify your CNIC', 'Choose amount & installment', 'Pay via JazzCash, EasyPaisa, or card'].map((s, i) => (
                   <div key={i} className="flex items-start gap-4">
                     <div className="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center flex-shrink-0 text-body-sm font-bold">{i + 1}</div>
-                    <span className="text-body-sm text-ink-600 pt-1">{s}</span>
+                    <p className="text-body-sm text-ink-600 pt-1.5">{s}</p>
                   </div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-3 mt-8">
-                {['JazzCash', 'EasyPaisa', 'HBL', 'MCB', 'Debit/Credit Card'].map((m) => (
-                  <span key={m} className="bg-ink-50 border border-ink-100 rounded-lg px-4 py-2 text-body-xs text-ink-600 font-medium">{m}</span>
+                {['JazzCash', 'EasyPaisa', 'HBL', 'MCB', 'Debit/Credit Card'].map(m => (
+                  <span key={m} className="bg-ink-50 border border-ink-200 rounded-lg px-3 py-1.5 text-body-xs text-ink-600 font-medium">{m}</span>
                 ))}
               </div>
             </ScrollReveal>
-            <ScrollReveal delay={0.1}>
-              <PayPremiumSection />
-            </ScrollReveal>
+            <ScrollReveal delay={0.1}><PayPremiumSection /></ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* Track Claim */}
       <section id="claims" className="py-14 md:py-20 bg-ink-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
@@ -349,7 +383,6 @@ export default function Policyholder() {
         </div>
       </section>
 
-      {/* Find Agent */}
       <section id="agent" className="py-14 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
