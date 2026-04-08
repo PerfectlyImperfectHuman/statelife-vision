@@ -2,6 +2,7 @@ import { CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ScrollReveal from '@/components/shared/ScrollReveal';
+import SEOHead from '@/components/shared/SEOHead';
 
 const productDetails = [
   {
@@ -96,6 +97,11 @@ const categoryColors: Record<string, { pill: string }> = {
 export default function Products() {
   return (
     <PageLayout>
+      <SEOHead
+        title="Insurance Products — Life, Health, Takaful & Corporate"
+        description="Explore State Life's complete range of insurance products: Platinum Plus, Jeevan Saathi, Sehat Zindagi, Takaful, Digital Insurance and more. Compare plans and get a free quote."
+        canonical="/products"
+      />
       {/* Hero */}
       <section className="py-14 md:py-20 bg-brand-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

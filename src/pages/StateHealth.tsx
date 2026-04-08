@@ -2,6 +2,7 @@ import { CheckCircle, Phone, Smartphone, Heart, Shield, Users } from 'lucide-rea
 import PageLayout from '@/components/layout/PageLayout';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
+import SEOHead from '@/components/shared/SEOHead';
 
 const plans = [
   { name: 'Shafi o Aafiat', type: 'Individual Health', color: 'brand' },
@@ -49,6 +50,11 @@ const heroStats = [
 export default function StateHealth() {
   return (
     <PageLayout>
+      <SEOHead
+        title="State Health Insurance Plans — Sehat Card Pakistan"
+        description="Comprehensive health insurance for individuals, families and corporates. Cashless treatment at 30,000+ hospitals. Government health programs including PM NHP and CM Health Cards."
+        canonical="/state-health"
+      />
       {/* HERO */}
       <section className="relative min-h-[70vh] overflow-hidden bg-gradient-to-br from-[#002616] via-[#014d28] to-[#002616]">
         <img

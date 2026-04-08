@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { MapPin, Phone, Mail, CheckCircle, Loader2 } from 'lucide-react';
+import { MapPin, Phone, Mail, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
 import ScrollReveal from '@/components/shared/ScrollReveal';
+import SEOHead from '@/components/shared/SEOHead';
+import { supabase } from '@/lib/supabase';
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(100),
@@ -24,23 +26,34 @@ const offices = [
 ];
 
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const { register, handleSubmit, watch, formState: { errors } } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   });
   const msgLength = (watch('message') || '').length;
 
-  const onSubmit = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setSubmitted(true);
-      setLoading(false);
-    }, 1500);
+  const onSubmit = async (data: ContactFormData) => {
+    setStatus('loading');
+    try {
+      if (supabase) {
+        const { error } = await supabase.from('contacts').insert([{ ...data, created_at: new Date().toISOString() }]);
+        if (error) throw error;
+      }
+      setStatus('success');
+    } catch (err: unknown) {
+      setStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    }
   };
 
   return (
     <PageLayout>
+      <SEOHead
+        title="Contact State Life — Helpline, Offices & Support"
+        description="Contact State Life Insurance Corporation. Call our free helpline 0800-700-900, visit a regional office, or submit your query online. We respond within 24 hours."
+        canonical="/contact"
+      />
       {/* Hero */}
       <section className="py-14 md:py-16 bg-brand-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,11 +73,23 @@ export default function Contact() {
             {/* Form */}
             <ScrollReveal className="lg:col-span-1">
               <div className="bg-white rounded-3xl p-8 shadow-card">
-                {submitted ? (
+                {status === 'success' ? (
                   <div className="text-center py-8">
                     <CheckCircle className="w-16 h-16 text-accent-500 mx-auto" />
                     <h3 className="text-display-md font-display text-ink-900 mt-4">Message Sent!</h3>
                     <p className="text-body-md text-ink-500 mt-2">We'll respond within 24 hours.</p>
+                    <button onClick={() => setStatus('idle')} className="mt-6 text-brand-500 text-body-sm font-semibold hover:text-brand-600 transition-colors">
+                      Submit another request →
+                    </button>
+                  </div>
+                ) : status === 'error' ? (
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-16 h-16 text-error mx-auto" />
+                    <h3 className="text-display-md font-display text-ink-900 mt-4">Submission Failed</h3>
+                    <p className="text-body-md text-ink-500 mt-2">{errorMessage}</p>
+                    <button onClick={() => setStatus('idle')} className="mt-6 text-brand-500 text-body-sm font-semibold hover:text-brand-600 transition-colors">
+                      Try again →
+                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -98,8 +123,8 @@ export default function Contact() {
                       <span className="absolute bottom-3 right-3 text-body-xs text-ink-400">{msgLength} / 500</span>
                       {errors.message && <p className="text-error text-body-xs mt-1">{errors.message.message}</p>}
                     </div>
-                    <button type="submit" disabled={loading} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors flex items-center justify-center gap-2">
-                      {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Message'}
+                    <button type="submit" disabled={status === 'loading'} className="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 text-body-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-70">
+                      {status === 'loading' ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Message'}
                     </button>
                   </form>
                 )}
