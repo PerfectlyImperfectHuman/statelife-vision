@@ -2,6 +2,7 @@ import { CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ScrollReveal from '@/components/shared/ScrollReveal';
+import SEOHead from '@/components/shared/SEOHead';
 
 const productDetails = [
   {
