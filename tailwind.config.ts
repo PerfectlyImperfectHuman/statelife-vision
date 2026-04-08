@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         display: ['Sora', 'sans-serif'],
         body: ['DM Sans', 'sans-serif'],
+        urdu: ['Noto Nastaliq Urdu', 'serif'],
       },
       fontSize: {
         'display-2xl': ['clamp(3rem,6vw,5rem)', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '800' }],

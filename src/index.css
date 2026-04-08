@@ -49,8 +49,22 @@
   body {
     @apply bg-background text-foreground font-body overflow-x-hidden;
   }
+  body.font-urdu {
+    font-family: 'Noto Nastaliq Urdu', serif;
+    direction: rtl;
+  }
   h1, h2, h3, h4 {
     @apply font-display;
+  }
+
+  /* Focus rings - WCAG 2.1 AA */
+  *:focus-visible {
+    outline: 2px solid #1560BD;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  *:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -61,6 +75,16 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
